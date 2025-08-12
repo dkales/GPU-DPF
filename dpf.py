@@ -316,8 +316,9 @@ def test_gpu_dpf_perf(N=2048, batch=dpf_cpp.BATCH_SIZE, entrysize=16, prf=DPF.DE
     elapsed = tend-tstart
 
     dpfs_per_sec = batch*reps/elapsed
+    msecs_per_dpf = 1000.0/ dpfs_per_sec
     keysize = np.prod(k1s[0].shape)*4
-    print("%s Key Size: %d bytes, Perf: %d dpfs/sec" % (dpf, keysize, dpfs_per_sec))
+    print("%s Key Size: %d bytes, Perf: %d dpfs/sec, %.3f ms/DPF" % (dpf, keysize, dpfs_per_sec, msecs_per_dpf))
 
 def test_cpu_dpf_perf(N=2048, batch=dpf_cpp.BATCH_SIZE, entrysize=16, prf=DPF.DEFAULT_PRF):
     dpf = DPF(prf=prf)
