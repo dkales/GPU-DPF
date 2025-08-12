@@ -125,7 +125,7 @@ std::vector<void *> eval_init(at::Tensor table) {
     uint128_t_gpu *table_ptr;
     gpuErrchk(cudaMalloc(&table_ptr,
                          sizeof(uint128_t_gpu) * num_entries * entry_size));
-    cudaMemcpy(&table_ptr, table_reordered_cvted,
+    cudaMemcpy(table_ptr, table_reordered_cvted,
                sizeof(uint128_t_gpu) * num_entries * entry_size,
                cudaMemcpyHostToDevice);
     cudaMemcpy(&TABLE[i], &table_ptr, sizeof(uint128_t_gpu *),
