@@ -88,6 +88,10 @@ at::Tensor eval_dpf_cpu(at::Tensor key, int prf_method) {
 }
 
 void eval_free(std::vector<void *> buffers) {
+  uint128_t_gpu **TABLE = (uint128_t_gpu **)buffers[0];
+  for (int i = 0; i < BATCH_SIZE; i++) {
+    cudaFree(TABLE[i]);
+  }
   cudaFree(buffers[0]);
   cudaFree(buffers[1]);
   cudaFree(buffers[2]);
@@ -164,7 +168,7 @@ at::Tensor eval_gpu(std::vector<at::Tensor> keys, std::vector<void *> buffers,
   cudaMemcpy(CW_GPU, cw_intermediate,
              sizeof(SeedsCodewordsFlatGPU) * (keys.size()),
              cudaMemcpyHostToDevice);
-  uint128_t_gpu **TABLE = (uint128_t_gpu *)buffers[0];
+  uint128_t_gpu **TABLE = (uint128_t_gpu **)buffers[0];
   uint128_t_gpu *OUT = (uint128_t_gpu *)buffers[2];
 
   // Perform batched dpf lookup
