@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    ".eslintignore": "ignore",
+    "*.typst": "typst",
+    "format": "cpp"
+  }
+}

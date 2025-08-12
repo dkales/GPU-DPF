@@ -22,7 +22,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line,
 #define MM 2
 
 // Batch size
-#define BATCH_SIZE 512
+#define BATCH_SIZE 1
 
 #include "dpf_base/dpf.h"
 #include "dpf_gpu/dpf/dpf_hybrid.cu"
@@ -113,14 +113,17 @@ std::vector<void *> eval_init(at::Tensor table) {
     }
   }
 
-  uint128_t_gpu *TABLE;
+  uint128_t_gpu **TABLE;
 
+  gpuErrchk(cudaMalloc(&TABLE, sizeof(void *) * BATCH_SIZE));
   // Alloc and cpy to uint128_t_gpu array
-  gpuErrchk(
-      cudaMalloc(&TABLE, sizeof(uint128_t_gpu) * num_entries * entry_size));
-  cudaMemcpy(TABLE, table_reordered_cvted,
-             sizeof(uint128_t_gpu) * num_entries * entry_size,
-             cudaMemcpyHostToDevice);
+  for (int i = 0; i < BATCH_SIZE; i++) {
+    gpuErrchk(cudaMalloc(&TABLE[i],
+                         sizeof(uint128_t_gpu) * num_entries * entry_size));
+    cudaMemcpy(TABLE, table_reordered_cvted,
+               sizeof(uint128_t_gpu) * num_entries * entry_size,
+               cudaMemcpyHostToDevice);
+  }
 
   delete table_reordered_cvted;
 
@@ -161,7 +164,7 @@ at::Tensor eval_gpu(std::vector<at::Tensor> keys, std::vector<void *> buffers,
   cudaMemcpy(CW_GPU, cw_intermediate,
              sizeof(SeedsCodewordsFlatGPU) * (keys.size()),
              cudaMemcpyHostToDevice);
-  uint128_t_gpu *TABLE = (uint128_t_gpu *)buffers[0];
+  uint128_t_gpu **TABLE = (uint128_t_gpu *)buffers[0];
   uint128_t_gpu *OUT = (uint128_t_gpu *)buffers[2];
 
   // Perform batched dpf lookup
